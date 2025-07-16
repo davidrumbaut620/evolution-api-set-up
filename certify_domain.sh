@@ -1,10 +1,3 @@
-#!/bin/bash
-
-set -e
-
-# Dominio a certificar (reemplaza con tu dominio real)
-DOMAIN="api.tudominio.com"
-
 # Instalar NGINX y Certbot si no existen
 sudo apt update
 sudo apt install -y nginx certbot python3-certbot-nginx
@@ -13,7 +6,7 @@ sudo apt install -y nginx certbot python3-certbot-nginx
 cat > "/etc/nginx/sites-available/evolution_api" <<EOF
 server {
     listen 80;
-    server_name $DOMAIN;
+    server_name TU_DOMINIO.com;
 
     location / {
         proxy_pass http://localhost:8080;
@@ -34,22 +27,22 @@ ln -sf /etc/nginx/sites-available/evolution_api /etc/nginx/sites-enabled/evoluti
 sudo nginx -t && sudo systemctl reload nginx
 
 # Paso 2: Obtener certificado SSL con Certbot
-sudo certbot --nginx -d $DOMAIN
+sudo certbot --nginx -d TU_DOMINIO.com
 
 # Paso 3: Reescribir configuración con versión segura (HTTPS)
 cat > "/etc/nginx/sites-available/evolution_api" <<EOF
 server {
     listen 80;
-    server_name $DOMAIN;
+    server_name TU_DOMINIO.com;
     return 301 https://\$host\$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name $DOMAIN;
+    server_name TU_DOMINIO.com;
 
-    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/TU_DOMINIO.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/TU_DOMINIO.com/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
