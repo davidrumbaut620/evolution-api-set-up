@@ -10,12 +10,14 @@ if ! command -v docker compose &> /dev/null; then
   sudo install -m 0755 -d /etc/apt/keyrings
   curl -fsSL https://download.docker.com/linux/debian/gpg | \
   sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  sudo chmod a+r /etc/apt/keyrings/docker.gpg -y
+  sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
   echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
   https://download.docker.com/linux/debian bookworm stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  
+  sudo apt update
   sudo apt install -y docker-compose-plugin
 fi
 
@@ -34,7 +36,7 @@ cd "$PROJECT_DIR"
 # Crear .env
 cat > .env <<EOF
 CONFIG_SESSION_PHONE_VERSION=2.3000.1023204200
-AUTHENTICATION_API_KEY=change-password
+AUTHENTICATION_API_KEY=change-password-2
 
 DATABASE_ENABLED=true
 DATABASE_PROVIDER=postgresql
