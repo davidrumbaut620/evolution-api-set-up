@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e
 
+# Verificar si Docker está instalado
+if ! command -v docker &> /dev/null; then
+  sudo apt update
+  sudo apt install -y docker.io
+  sudo systemctl start docker
+  sudo systemctl enable docker
+fi
+
 # Verificar si Docker Compose está instalado
 if ! command -v docker compose &> /dev/null; then
   echo "⚠️  docker compose no está instalado. Instalando docker-compose-plugin..."
@@ -16,7 +24,7 @@ if ! command -v docker compose &> /dev/null; then
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
   https://download.docker.com/linux/debian bookworm stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-  
+
   sudo apt update
   sudo apt install -y docker-compose-plugin
 fi
@@ -36,7 +44,7 @@ cd "$PROJECT_DIR"
 # Crear .env
 cat > .env <<EOF
 CONFIG_SESSION_PHONE_VERSION=2.3000.1023204200
-AUTHENTICATION_API_KEY=change-password-2
+AUTHENTICATION_API_KEY=change-password
 
 DATABASE_ENABLED=true
 DATABASE_PROVIDER=postgresql
@@ -87,16 +95,16 @@ EOF
 
 # Eliminar contenedores y volúmenes previos si existen
 echo "🧼 Limpiando contenedores anteriores..."
-docker compose down -v || true
-docker volume prune -f || true
+sudo docker compose down -v || true
+sudo docker volume prune -f || true
 
 # Levantar nuevo stack
 echo "🚀 Iniciando Evolution API..."
-docker compose up -d
+sudo docker compose up -d
 
 # Esperar 5 segundos
 sleep 5
 
 # Mostrar logs iniciales
 echo "📜 Logs iniciales de evolution_api:"
-docker logs -f evolution_api
+sudo docker logs -f evolution_api
