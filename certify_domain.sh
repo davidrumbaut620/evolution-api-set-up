@@ -1,4 +1,4 @@
-# Instalar NGINX y Certbot si no existen
+# Instalar NGINX y Certbot si no existen - "nginx -v"
 sudo apt update
 sudo apt install -y nginx certbot python3-certbot-nginx
 
