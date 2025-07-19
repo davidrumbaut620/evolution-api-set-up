@@ -23,7 +23,6 @@ server {
 EOF'
 
 # Habilitar configuración
-sudo rm /etc/nginx/sites-enabled/default
 sudo ln -sf /etc/nginx/sites-available/evolution_api /etc/nginx/sites-enabled/evolution_api
 sudo nginx -t && sudo systemctl reload nginx
 
