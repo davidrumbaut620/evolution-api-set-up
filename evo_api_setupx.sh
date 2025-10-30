@@ -78,6 +78,7 @@ banner "Parámetros de despliegue"
 PROJECT_DIR=$(prompt "Carpeta del proyecto" "evolution_project")
 AUTH_KEY=$(prompt "AUTHENTICATION_API_KEY" "change-password")
 
+# Selección de base de datos y caché
 if yn "¿Desplegar Postgres y Redis con Docker (recomendado)?" "y"; then
   USE_LOCAL_DB=1
   PG_USER=$(prompt "Usuario Postgres" "myuser")
@@ -91,6 +92,7 @@ else
   REDIS_URI=$(prompt "CACHE_REDIS_URI" "redis://host:6379/0")
 fi
 
+# Configuración opcional de NGINX + SSL
 if yn "¿Configurar NGINX + SSL con Certbot?" "y"; then
   WANT_SSL=1
   DOMAIN=$(prompt "Subdominio para HTTPS" "api.midominio.com")
@@ -157,7 +159,7 @@ EOF
 ok "docker-compose.yml creado"
 
 banner "Limpiar y levantar stack"
-$SUDO docker compose down -v || true
+$SUDO $DC_CMD down -v || true
 $SUDO docker volume prune -f || true
 $SUDO $DC_CMD up -d
 ok "Stack iniciado"
