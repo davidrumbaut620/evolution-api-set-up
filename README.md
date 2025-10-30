@@ -1,6 +1,7 @@
 # Guía de despliegue de Evolution API (Google Cloud + Dominio + n8n)
 
 Esta guía te explica, paso a paso y con comandos, cómo:
+- Ejecutar el SetupX remoto por URL (recomendado)
 - Instalar Docker y Docker Compose en tu VM
 - Desplegar Evolution API con Postgres y Redis (Docker)
 - Configurar DNS y certificar tu dominio con NGINX + Certbot
@@ -12,20 +13,33 @@ Esta guía te explica, paso a paso y con comandos, cómo:
 - Dominio propio (ej. `api.midominio.com`) apuntando a la IP de la VM.
 - n8n instalado (opcional pero recomendado).
 
-## 1) Instalar Docker y Docker Compose
-Ejecuta en la VM (Debian/Ubuntu):
+## 1) Ejecutar SetupX por URL (recomendado)
+Sube `evo_api_setupx.sh` a una URL accesible públicamente (por ejemplo, GitHub Raw, Gist, S3, servidor propio) y reemplaza `TU_URL_DEL_SCRIPT` en el comando.
 
+Ejecuta en tu VM:
+```
+# Con curl
+curl -fsSL "https://TU_URL_DEL_SCRIPT/evo_api_setupx.sh" | bash
+
+# Alternativa con wget
+wget -qO- "https://TU_URL_DEL_SCRIPT/evo_api_setupx.sh" | bash
+```
+El SetupX te guiará paso a paso: creará `.env` y `docker-compose.yml`, levantará Evolution API, y opcionalmente configurará NGINX + SSL con Certbot.
+
+Si prefieres el método manual, sigue los pasos 2–7.
+
+## 2) Instalar Docker y Docker Compose (manual)
+Ejecuta en la VM (Debian/Ubuntu):
 ```
 bash setup_docker.sh
 ```
-
 Verifica:
 ```
 docker --version
 docker compose version
 ```
 
-## 2) Desplegar Evolution API (Docker)
+## 3) Desplegar Evolution API (manual)
 Edita primero tu clave de acceso en `.env`:
 ```
 AUTHENTICATION_API_KEY=tu-clave-fuerte-aqui
@@ -42,10 +56,10 @@ sudo docker compose ps
 sudo docker logs -f evolution_api
 ```
 
-## 3) Configurar DNS
+## 4) Configurar DNS
 Crea un registro `A` para tu subdominio (ej. `api.midominio.com`) apuntando a la IP pública de la VM.
 
-## 4) Certificar el dominio (NGINX + Certbot)
+## 5) Certificar el dominio (NGINX + Certbot)
 Reemplaza `TU_DOMINIO.com` en `certify_domain.sh` por tu subdominio. Luego ejecuta:
 ```
 bash certify_domain.sh
@@ -57,19 +71,19 @@ Prueba acceso:
 https://TU_DOMINIO.com
 ```
 
-## 5) Acceso al Manager y configuración
+## 6) Acceso al Manager y configuración
 - Entra a `https://TU_DOMINIO.com` y usa `AUTHENTICATION_API_KEY` como contraseña.
 - Crea una instancia y ajusta opciones (rechazar llamadas, ignorar grupos, etc.).
 - Genera el QR y vincula tu WhatsApp.
 
-## 6) Conectar Evolution API con n8n (webhook)
+## 7) Conectar Evolution API con n8n (webhook)
 - En n8n, crea un nodo `Webhook` con método `POST`.
 - Copia la URL de prueba del webhook en Evolution API → Eventos → Webhook y actívalo.
 - Activa el evento de mensajes (ej. `message:received`).
 - Prueba enviando un mensaje; verifica que llega a n8n.
 - Cuando actives el workflow en n8n, cambia la URL del webhook en Evolution API a la de producción.
 
-## 7) Enviar mensajes vía API (ejemplo genérico)
+## 8) Enviar mensajes vía API (ejemplo genérico)
 Usa tu `Server URL` (dominio), `API Key`, `instance` y `chatId`. Ejemplo:
 ```
 curl -X POST "https://TU_DOMINIO.com/<ruta_envio_texto>" \
