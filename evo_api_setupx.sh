@@ -31,7 +31,7 @@ fi
 
 banner "Comprobaciones iniciales"
 info "Distro: ${DISTRO_ID} (${DISTRO_CODE})"
-info "SUDO: ${SUDO:+sí}${SUDO:+' '}"
+info "SUDO: ${SUDO:+sí }"
 
 prompt(){ local label="$1"; local default="$2"; local var;
   read -r -p "${label} [${default}]: " var; echo "${var:-$default}"; }
@@ -41,18 +41,26 @@ yn(){ local label="$1"; local default="$2"; local var;
   case "$var" in y|Y) return 0;; *) return 1;; esac }
 
 banner "Instalar Docker y Compose si faltan"
-if ! command -v docker >/dev/null 2>&1; then
+# Comprobación de Docker
+if command -v docker >/dev/null 2>&1; then
+  ok "Docker ya instalado"
+else
   info "Instalando Docker..."
   $SUDO apt update -y
   $SUDO apt install -y docker.io
   $SUDO systemctl start docker
   $SUDO systemctl enable docker
   ok "Docker instalado"
-else
-  ok "Docker ya instalado"
 fi
 
-if ! docker compose version >/dev/null 2>&1; then
+# Comprobación de Docker Compose (plugin o clásico)
+if docker compose version >/dev/null 2>&1; then
+  ok "Docker Compose ya disponible (plugin)"
+  DC_CMD="docker compose"
+elif command -v docker-compose >/dev/null 2>&1; then
+  ok "Docker Compose ya disponible (binario docker-compose)"
+  DC_CMD="docker-compose"
+else
   info "Instalando Docker Compose plugin..."
   $SUDO apt update -y
   $SUDO apt install -y ca-certificates curl gnupg
@@ -63,8 +71,7 @@ if ! docker compose version >/dev/null 2>&1; then
   $SUDO apt update -y
   $SUDO apt install -y docker-compose-plugin
   ok "Docker Compose plugin instalado"
-else
-  ok "Docker Compose plugin ya disponible"
+  DC_CMD="docker compose"
 fi
 
 banner "Parámetros de despliegue"
@@ -152,11 +159,11 @@ ok "docker-compose.yml creado"
 banner "Limpiar y levantar stack"
 $SUDO docker compose down -v || true
 $SUDO docker volume prune -f || true
-$SUDO docker compose up -d
+$SUDO $DC_CMD up -d
 ok "Stack iniciado"
 
 sleep 3
-$SUDO docker compose ps
+$SUDO $DC_CMD ps
 
 info "Logs iniciales (puedes salir con Ctrl+C):"
 $SUDO docker logs -f evolution_api || true
@@ -166,24 +173,24 @@ if [ "$WANT_SSL" = "1" ]; then
   $SUDO apt update -y
   $SUDO apt install -y nginx certbot python3-certbot-nginx
 
-  $SUDO bash -c 'cat > "/etc/nginx/sites-available/evolution_api" <<NGINX
+  $SUDO tee /etc/nginx/sites-available/evolution_api > /dev/null <<NGINX
 server {
     listen 80;
-    server_name ${DOMAIN};
+    server_name $DOMAIN;
 
     location / {
         proxy_pass http://localhost:8080;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "Upgrade";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_cache_bypass \$http_upgrade;
     }
 }
-NGINX'
+NGINX
 
   $SUDO ln -sf /etc/nginx/sites-available/evolution_api /etc/nginx/sites-enabled/evolution_api
   $SUDO nginx -t && $SUDO systemctl reload nginx
