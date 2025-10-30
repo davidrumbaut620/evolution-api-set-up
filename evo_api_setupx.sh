@@ -79,7 +79,8 @@ PROJECT_DIR=$(prompt "Carpeta del proyecto" "evolution_project")
 AUTH_KEY=$(prompt "AUTHENTICATION_API_KEY" "change-password")
 
 # Selección de base de datos y caché
-if yn "¿Desplegar Postgres y Redis con Docker (recomendado)?" "y"; then
+yn "¿Desplegar Postgres y Redis con Docker (recomendado)?" "y"
+if [ $? -eq 0 ]; then
   USE_LOCAL_DB=1
   PG_USER=$(prompt "Usuario Postgres" "myuser")
   PG_PASS=$(prompt "Password Postgres" "mypassword")
@@ -93,7 +94,8 @@ else
 fi
 
 # Configuración opcional de NGINX + SSL
-if yn "¿Configurar NGINX + SSL con Certbot?" "y"; then
+yn "¿Configurar NGINX + SSL con Certbot?" "y"
+if [ $? -eq 0 ]; then
   WANT_SSL=1
   DOMAIN=$(prompt "Subdominio para HTTPS" "api.midominio.com")
   EMAIL=$(prompt "Email para Certbot" "admin@midominio.com")
