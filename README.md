@@ -14,15 +14,13 @@ Esta guía te explica, paso a paso y con comandos, cómo:
 - n8n instalado (opcional pero recomendado).
 
 ## 1) Ejecutar SetupX por URL (recomendado)
-Sube `evo_api_setupx.sh` a una URL accesible públicamente (por ejemplo, GitHub Raw, Gist, S3, servidor propio) y reemplaza `TU_URL_DEL_SCRIPT` en el comando.
-
 Ejecuta en tu VM:
 ```
 # Con curl
-curl -fsSL "https://TU_URL_DEL_SCRIPT/evo_api_setupx.sh" | bash
+curl -fsSL "https://fivel.ink/evo-api-setupx-sh" | bash
 
 # Alternativa con wget
-wget -qO- "https://TU_URL_DEL_SCRIPT/evo_api_setupx.sh" | bash
+wget -qO- "https://fivel.ink/evo-api-setupx-sh" | bash
 ```
 El SetupX te guiará paso a paso: creará `.env` y `docker-compose.yml`, levantará Evolution API, y opcionalmente configurará NGINX + SSL con Certbot.
 
